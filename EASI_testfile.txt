@@ -1,0 +1,32 @@
+1 ! This is a comment
+24 DOC This is documentation
+32 DOC_end
+40 doc This is another documentation line
+41 !This is another comment
+84 status_TITLE "Hello world"  
+Status_S "Hullo wurld"
+local int n1, n2, n$3
+ !This is a new comment
+run module_name \ r "quoted_module_name" 
+status module1
+  s module2
+define function F(param1, param2) 
+  !This comment is inside the function
+  local string s1, s2
+  rem this is the string to remove, but I don't know what that means yet
+enddefine  
+show varname
+show var_again 5  , 5
+INPUT "Try something" gotcha
+load "module_name"
+goto_label_name:
+log Hi mom!  I'm in a log file!
+try log I'm gonna try something here!
+  88 show secret
+onerror 
+  50 input "damn it don't do that, talk to me: " jim
+ask "What's the answer?" answer
+endonerror
+reset
+import g1, g2, g3
+

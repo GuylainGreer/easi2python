@@ -1,0 +1,40 @@
+ErrorHandle: "noerror"|("onerror" expression)|
+DONE Comment: "!" string newline
+DONE Documentation: "doc" string end_statement -"doc_end"
+DONE SetStatusTitle: "status_title" quoted_string
+DONE SetStatusS: "status_s" quoted_string
+DONE VariableDeclaration: "local"|"global" -var_type identifier, *("," identifier)
+Assignment: identifier "=" -expression
+DeleteFile: "del" expression
+DECLARED FunctionCall: -"call" identifier "(" -(expression % ",") ")"
+DONE RunModule: ("r"|"run") identifier
+DONE StatModule: ("s"|"status") identifier
+WhileLoop: "while" "(" expression ")" *statements "endwhile"
+IfThenBlock: "if" "(" expression ")" "then" *statements -("else" *statements) "endif"
+SingleStatementIf: "if" "(" expression ")" statement
+DONE FunctionDefinition: "define" "function" identifier "(" -(identifier % ",") ")" *statements "enddefine"
+PrintStatement: "printf" quoted_string -("," expression % ",")
+GotoStatement: "goto" expression
+DONE RemoveStatement: "rem" (quoted_string|string)
+PrintAt: ("p"|"print") "@" "(" int "," int -("," printing_options % ",") ")" unknown_stuff
+DONE ShowVariable: "show" identifier -(int "," int)
+DONE GetUserInput: "input" quoted_string identifier
+SwitchCase: "case" "(" expression ")" +(expression ";" int)
+DONE LoadModule: "load" quoted_string
+ForLoop: "for" identifer "=" expression "to" expression end_statement *statements "endfor"
+DONE GotoLabel: string ":"
+DONE LogMessage: "log" string
+DONE TryCatchBlock: "try" -(??)end_statement *statements "onerror" *statements "endonerror"
+StatusEnd: "status_end"
+DONE AskForInput: "ask" quoted_string identifier
+DONE ResetPRM: "reset"
+DONE ImportVariables: "import" (identifier % ",")
+DONE end_statement: (newline | "\\")
+DONE newline: "\n"
+PARTIAL statement: -int expression|Comment|Documentation|SetStatusTitle|SetStatusS|VeriableDeclaration|Assignment|DeleteFile|FunctionCall|RunModule|StatModule|WhileLoop|IfThenBlock|SingleStatementIf|FunctionDefition|PrintStatement|Goto|RemoveStatement|PrintAt|ShowVariable|GetUserInput|SwitchCase|LoadModule|ForLoop|GotoLabel|LogMessage|TryCatchBlock|StatusEnd|AskForInput|ResetPRM|ImportVariables -ErrorHandle end_statement
+factor = identifier | constant | FunctionCall | "(" expression ")" | quoted_string
+factor_symbol = "+" | "-"
+term_symbol = "*" | "/"
+term = factor *(term_symbol factor)
+DECLARED expression = term *(factor_symbol term)
+identifier = (alpha | "#" | "$") *(alnum | "#" | "$")
