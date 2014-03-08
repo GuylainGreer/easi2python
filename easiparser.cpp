@@ -1,3 +1,5 @@
+#include "variable_declaration.hh"
+#include "set_status_string.hh"
 #include "set_status_title.hh"
 #include "documentation.hh"
 #include "comment.hh"
@@ -40,25 +42,6 @@ namespace std {
 
 using namespace boost::spirit;
 using namespace boost::phoenix;
-
-struct SetStatusS
-{
-    std::string identifier;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(SetStatusS, (std::string, identifier));
-
-struct VariableDeclaration
-{
-    bool is_local = false;
-    std::string type;
-    std::vector<std::string> names;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(VariableDeclaration,
-                          (bool, is_local)
-                          (std::string, type)
-                          (std::vector<std::string>, names));
 
 struct FunctionCall;
 struct AddSubtract;
@@ -219,7 +202,7 @@ struct Statement
         Comment,
         Documentation,
         SetStatusTitle,
-        SetStatusS,
+        SetStatusString,
         VariableDeclaration,
         RunModule,
         StatModule,
@@ -338,15 +321,8 @@ struct EASIRules :
         comment = Comment::get_rule();
         documentation = Documentation::get_rule();
         set_status_title = SetStatusTitle::get_rule();
-        set_status_s =
-            ascii::no_case[lit("status_s")] >> +qi::blank >>
-            common::quoted_string[at_c<0>(_val) = _1];
-        variable_declaration =
-            (qi::no_case[lit("local")[at_c<0>(_val) = true]] >>
-             +qi::blank) ||
-             ((lit("string")[at_c<1>(_val) = "string"] |
-               lit("int")[at_c<1>(_val) = "int"] ) >> +qi::blank) >>
-             common::word_list[at_c<2>(_val) = _1];
+        set_status_s = SetStatusString::get_rule();
+        variable_declaration = VariableDeclaration::get_rule();
         run_module =
             (qi::no_case['r'] >> -qi::no_case[lit("un")]) >>
             +qi::blank >> (common::identifier | common::quoted_string)[at_c<0>(_val) = _1];
@@ -407,7 +383,7 @@ struct EASIRules :
              get_user_input | load_module | goto_label | log_message |
              try_catch | reset_prm | import_variables)
             [at_c<1>(_val) = _1];
-        start = *(statement >> common::end_statement);
+        start = *(statement >> +common::end_statement);
 
         init(start,
              documentation,
@@ -440,7 +416,7 @@ struct EASIRules :
     qi::rule<common::iter,Documentation()> documentation;
     qi::rule<common::iter,Comment()> comment;
     qi::rule<common::iter,SetStatusTitle()> set_status_title;
-    qi::rule<common::iter,SetStatusS()> set_status_s;
+    qi::rule<common::iter,SetStatusString()> set_status_s;
     qi::rule<common::iter,VariableDeclaration()> variable_declaration;
     qi::rule<common::iter,RunModule()> run_module;
     qi::rule<common::iter,StatModule()> stat_module;
