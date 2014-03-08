@@ -8,7 +8,7 @@ qi::rule<common::iter, void()> common::newline =
     '\r' || qi::char_('\n');
 
 qi::rule<common::iter, void()> common::end_statement =
-    *qi::blank >> (common::newline | '\\' | qi::eoi);
+    *qi::blank >> (common::newline | '\\');
 
 qi::rule<common::iter, void()> common::end_quote =
     '"' | common::newline | qi::eoi;
