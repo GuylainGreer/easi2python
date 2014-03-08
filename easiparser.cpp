@@ -1,3 +1,6 @@
+#include "import_variables.hh"
+#include "reset_prm.hh"
+#include "log_message.hh"
 #include "goto_label.hh"
 #include "load_module.hh"
 #include "get_user_input.hh"
@@ -115,29 +118,6 @@ struct FunctionCall
 BOOST_FUSION_ADAPT_STRUCT(FunctionCall,
                           (std::string,name)
                           (std::vector<Expression>,arguments));
-
-struct LogMessage
-{
-    std::string message;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(LogMessage,
-                          (std::string, message));
-
-struct ResetPRM
-{
-    int dummy = 1;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(ResetPRM, (int, dummy));
-
-struct ImportVariables
-{
-    std::vector<std::string> names;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(ImportVariables,
-                          (std::vector<std::string>, names));
 
 struct FunctionDefinition;
 struct TryCatch;
@@ -286,17 +266,15 @@ struct EASIRules :
         get_user_input = GetUserInput::get_rule();
         load_module = LoadModule::get_rule();
         goto_label = GotoLabel::get_rule();
-        log_message = qi::no_case[qi::lit("log")] >> +qi::blank >>
-            +(qi::char_ - common::newline)[at_c<0>(_val) += _1];
+        log_message = LogMessage::get_rule();
         try_catch = qi::no_case[qi::lit("try")] >> *qi::blank >> -common::newline >> 
             *(statement[push_back(at_c<0>(_val), _1)] >> common::end_statement) >>
             qi::no_case[qi::lit("onerror")] >>
             *qi::blank >> -common::newline >> 
             *(statement[push_back(at_c<1>(_val), _1)] >> common::end_statement) >>
             *qi::blank >> qi::no_case[qi::lit("endonerror")];
-        reset_prm = qi::no_case[qi::lit("reset")][_val = ResetPRM()];
-        import_variables = qi::no_case[qi::lit("import")] >> +qi::blank >>
-            (*qi::blank >> common::identifier[push_back(at_c<0>(_val), _1)] >> *qi::blank) % ',';
+        reset_prm = ResetPRM::get_rule();
+        import_variables = ImportVariables::get_rule();
         expression = (common::identifier | double_ | common::quoted_string[at_c<1>(_val) = true] | 
                       function_call
                      /* | ('(' >> *qi::blank >> +add_subtract >> *qi::blank >> ')')*/)
