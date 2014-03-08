@@ -1,3 +1,8 @@
+#include "goto_label.hh"
+#include "load_module.hh"
+#include "get_user_input.hh"
+#include "show_variable.hh"
+#include "remove_string.hh"
 #include "stat_module.hh"
 #include "run_module.hh"
 #include "variable_declaration.hh"
@@ -110,50 +115,6 @@ struct FunctionCall
 BOOST_FUSION_ADAPT_STRUCT(FunctionCall,
                           (std::string,name)
                           (std::vector<Expression>,arguments));
-
-struct RemoveString
-{
-    std::string value;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(RemoveString,
-                          (std::string, value));
-
-struct ShowVariable
-{
-    std::string var_name;
-    int min = -1, max = -1;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(ShowVariable,
-                          (std::string, var_name)
-                          (int, min)(int, max));
-
-struct GetUserInput
-{
-    std::string output_message;
-    std::string input_into;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(GetUserInput,
-                          (std::string, output_message)
-                          (std::string, input_into));
-
-struct LoadModule
-{
-    std::string module_name;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(LoadModule,
-                          (std::string, module_name));
-
-struct GotoLabel
-{
-    std::string name;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(GotoLabel,
-                          (std::string, name));
 
 struct LogMessage
 {
@@ -320,22 +281,11 @@ struct EASIRules :
              *(statement[push_back(at_c<2>(_val), _1)] >> 
                common::end_statement) >>
              qi::no_case[qi::lit("enddefine")]);
-        remove_string = 
-            qi::no_case[qi::lit("rem")] >> +qi::blank >>
-            *(qi::char_ - common::newline)[at_c<0>(_val) += _1];
-        show_variable =
-            qi::no_case["show"] >> +qi::blank >>
-            common::identifier[at_c<0>(_val) += _1] >>
-            -(+qi::blank >> int_[at_c<1>(_val) = _1] >> *qi::blank >>
-              ',' >> *qi::blank >>
-              int_[at_c<2>(_val) = _1]);
-        get_user_input = qi::no_case[qi::lit("input") |
-                                     qi::lit("ask")] >> +qi::blank >>
-            common::quoted_string[at_c<0>(_val) = _1] >> *qi::blank >>
-            common::identifier[at_c<1>(_val) += _1];
-        load_module = qi::no_case[qi::lit("load")] >> +qi::blank >>
-            common::quoted_string[at_c<0>(_val) = _1];
-        goto_label = *(qi::char_ - (qi::blank | ':'))[at_c<0>(_val) += _1] >> ':';
+        remove_string = RemoveString::get_rule();
+        show_variable = ShowVariable::get_rule();
+        get_user_input = GetUserInput::get_rule();
+        load_module = LoadModule::get_rule();
+        goto_label = GotoLabel::get_rule();
         log_message = qi::no_case[qi::lit("log")] >> +qi::blank >>
             +(qi::char_ - common::newline)[at_c<0>(_val) += _1];
         try_catch = qi::no_case[qi::lit("try")] >> *qi::blank >> -common::newline >> 
