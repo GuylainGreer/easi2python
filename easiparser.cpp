@@ -1,3 +1,4 @@
+#include "common.hh"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/fusion/include/size.hpp>
@@ -40,6 +41,10 @@ using namespace boost::phoenix;
 struct Comment
 {
     std::string comment;
+    static qi::rule<common::iter, Comment()> get_rule()
+    {
+        return "!" >> *(qi::char_ - common::newline);
+    }
 };
 
 BOOST_FUSION_ADAPT_STRUCT(Comment, (std::string, comment));
@@ -350,89 +355,79 @@ void init2(std::string name, Rule & rule)
 #define INIT(n) init2(#n, n);
 
 struct EASIRules :
-    qi::grammar<std::string::iterator,
+    qi::grammar<common::iter,
                 std::vector<Statement>()>
 {
     EASIRules() : EASIRules::base_type(start)
     {
-        newline = qi::char_('\n');
-        end_statement = *qi::blank >> (newline | '\\' | qi::eoi);
-        end_quote = '"' | end_statement;
-        identifier = (qi::alpha | '$' | '#' | '_') >>
-            *(qi::alnum | '$' | '#' | '_');
-        comment = "!" >> *(qi::char_ - newline);
+        comment = Comment::get_rule();
         documentation =
             ascii::no_case[lit("doc")] >> 
             +qi::blank >> 
-            (*(qi::char_ - newline)[at_c<0>(_val) += _1]) >> 
-            -(newline >> *qi::blank >> -int_[at_c<1>(_val) = _1] >> 
+            (*(qi::char_ - common::newline)[at_c<0>(_val) += _1]) >> 
+            -(common::newline >> *qi::blank >> -int_[at_c<1>(_val) = _1] >> 
               +qi::blank >> ascii::no_case[lit("doc_end")]);
-        quoted_string = 
-            '"' >> *(qi::char_ - end_quote) >> end_quote;
         set_status_title =
             ascii::no_case[lit("status_title")] >> +qi::blank >>
-            quoted_string[at_c<0>(_val) = _1];
+            common::quoted_string[at_c<0>(_val) = _1];
         set_status_s =
             ascii::no_case[lit("status_s")] >> +qi::blank >>
-            quoted_string[at_c<0>(_val) = _1];
-        word_list =
-            ((+(qi::char_ - (qi::blank | end_statement | ','))) %
-             (*qi::blank >> ',' >> *qi::blank));
+            common::quoted_string[at_c<0>(_val) = _1];
         variable_declaration =
             (qi::no_case[lit("local")[at_c<0>(_val) = true]] >>
              +qi::blank) ||
              ((lit("string")[at_c<1>(_val) = "string"] |
                lit("int")[at_c<1>(_val) = "int"] ) >> +qi::blank) >>
-             word_list[at_c<2>(_val) = _1];
+             common::word_list[at_c<2>(_val) = _1];
         run_module =
             (qi::no_case['r'] >> -qi::no_case[lit("un")]) >>
-            +qi::blank >> (identifier | quoted_string)[at_c<0>(_val) = _1];
+            +qi::blank >> (common::identifier | common::quoted_string)[at_c<0>(_val) = _1];
         stat_module =
             (qi::no_case['s'] >> -qi::no_case[lit("tatus")]) >>
             +qi::blank >> 
-            +(qi::char_ - end_statement)[at_c<0>(_val) += _1];
+            +(qi::char_ - common::end_statement)[at_c<0>(_val) += _1];
         function_definition =
             (qi::no_case[qi::lit("define")] >> +qi::blank >>
              qi::no_case[qi::lit("function")] >> +qi::blank >>
              +(qi::char_ - '(')[at_c<0>(_val) += _1] >>
              '(' >> *(qi::char_ - ')')[at_c<1>(_val) += _1] >> ')' >>
-             *(qi::blank | newline) >>
+             *(qi::blank | common::newline) >>
              *(statement[push_back(at_c<2>(_val), _1)] >> 
-               end_statement) >>
+               common::end_statement) >>
              qi::no_case[qi::lit("enddefine")]);
         remove_string = 
             qi::no_case[qi::lit("rem")] >> +qi::blank >>
-            *(qi::char_ - newline)[at_c<0>(_val) += _1];
+            *(qi::char_ - common::newline)[at_c<0>(_val) += _1];
         show_variable =
             qi::no_case["show"] >> +qi::blank >>
-            identifier[at_c<0>(_val) += _1] >>
+            common::identifier[at_c<0>(_val) += _1] >>
             -(+qi::blank >> int_[at_c<1>(_val) = _1] >> *qi::blank >>
               ',' >> *qi::blank >>
               int_[at_c<2>(_val) = _1]);
         get_user_input = qi::no_case[qi::lit("input") |
                                      qi::lit("ask")] >> +qi::blank >>
-            quoted_string[at_c<0>(_val) = _1] >> *qi::blank >>
-            identifier[at_c<1>(_val) += _1];
+            common::quoted_string[at_c<0>(_val) = _1] >> *qi::blank >>
+            common::identifier[at_c<1>(_val) += _1];
         load_module = qi::no_case[qi::lit("load")] >> +qi::blank >>
-            quoted_string[at_c<0>(_val) = _1];
+            common::quoted_string[at_c<0>(_val) = _1];
         goto_label = *(qi::char_ - (qi::blank | ':'))[at_c<0>(_val) += _1] >> ':';
         log_message = qi::no_case[qi::lit("log")] >> +qi::blank >>
-            +(qi::char_ - newline)[at_c<0>(_val) += _1];
-        try_catch = qi::no_case[qi::lit("try")] >> *qi::blank >> -newline >> 
-            *(statement[push_back(at_c<0>(_val), _1)] >> end_statement) >>
+            +(qi::char_ - common::newline)[at_c<0>(_val) += _1];
+        try_catch = qi::no_case[qi::lit("try")] >> *qi::blank >> -common::newline >> 
+            *(statement[push_back(at_c<0>(_val), _1)] >> common::end_statement) >>
             qi::no_case[qi::lit("onerror")] >>
-            *qi::blank >> -newline >> 
-            *(statement[push_back(at_c<1>(_val), _1)] >> end_statement) >>
+            *qi::blank >> -common::newline >> 
+            *(statement[push_back(at_c<1>(_val), _1)] >> common::end_statement) >>
             *qi::blank >> qi::no_case[qi::lit("endonerror")];
         reset_prm = qi::no_case[qi::lit("reset")][_val = ResetPRM()];
         import_variables = qi::no_case[qi::lit("import")] >> +qi::blank >>
-            (*qi::blank >> identifier[push_back(at_c<0>(_val), _1)] >> *qi::blank) % ',';
-        expression = (identifier | double_ | quoted_string[at_c<1>(_val) = true] | 
+            (*qi::blank >> common::identifier[push_back(at_c<0>(_val), _1)] >> *qi::blank) % ',';
+        expression = (common::identifier | double_ | common::quoted_string[at_c<1>(_val) = true] | 
                       function_call
                      /* | ('(' >> *qi::blank >> +add_subtract >> *qi::blank >> ')')*/)
             [at_c<0>(_val) = _1];
         //multiply_divide;
-        function_call = identifier[at_c<0>(_val) = _1] >> *qi::blank >> '(' >> 
+        function_call = common::identifier[at_c<0>(_val) = _1] >> *qi::blank >> '(' >> 
             (*qi::space >> expression[push_back(at_c<1>(_val), _1)] >> 
              *qi::space) % ',' >> ')';
 
@@ -444,7 +439,7 @@ struct EASIRules :
              get_user_input | load_module | goto_label | log_message |
              try_catch | reset_prm | import_variables)
             [at_c<1>(_val) = _1];
-        start = *(statement >> end_statement);
+        start = *(statement >> common::end_statement);
 
         init(start,
              documentation,
@@ -465,42 +460,38 @@ struct EASIRules :
              reset_prm,
              import_variables,
              statement);
-        INIT(identifier);
-        INIT(quoted_string);
-        INIT(end_statement);
-        INIT(newline);
-        INIT(end_quote);
-        INIT(word_list);
+        INIT(common::identifier);
+        INIT(common::quoted_string);
+        INIT(common::end_statement);
+        INIT(common::newline);
+        INIT(common::end_quote);
+        INIT(common::word_list);
     }
 
-    qi::rule<std::string::iterator,std::vector<Statement>()> start;
-    qi::rule<std::string::iterator,Documentation()> documentation;
-    qi::rule<std::string::iterator,Comment()> comment;
-    qi::rule<std::string::iterator,SetStatusTitle()> set_status_title;
-    qi::rule<std::string::iterator,SetStatusS()> set_status_s;
-    qi::rule<std::string::iterator,VariableDeclaration()> variable_declaration;
-    qi::rule<std::string::iterator,RunModule()> run_module;
-    qi::rule<std::string::iterator,StatModule()> stat_module;
-    qi::rule<std::string::iterator,FunctionDefinition()> function_definition;
-    qi::rule<std::string::iterator,RemoveString()> remove_string;
-    qi::rule<std::string::iterator,GetUserInput()> get_user_input;
-    qi::rule<std::string::iterator,LoadModule()> load_module;
-    qi::rule<std::string::iterator,GotoLabel()> goto_label;
-    qi::rule<std::string::iterator,LogMessage()> log_message;
-    qi::rule<std::string::iterator,TryCatch()> try_catch;
-    qi::rule<std::string::iterator,ShowVariable()> show_variable;
-    qi::rule<std::string::iterator,ResetPRM()> reset_prm;
-    qi::rule<std::string::iterator,ImportVariables()> import_variables;
+    qi::rule<common::iter,std::vector<Statement>()> start;
+    qi::rule<common::iter,Documentation()> documentation;
+    qi::rule<common::iter,Comment()> comment;
+    qi::rule<common::iter,SetStatusTitle()> set_status_title;
+    qi::rule<common::iter,SetStatusS()> set_status_s;
+    qi::rule<common::iter,VariableDeclaration()> variable_declaration;
+    qi::rule<common::iter,RunModule()> run_module;
+    qi::rule<common::iter,StatModule()> stat_module;
+    qi::rule<common::iter,FunctionDefinition()> function_definition;
+    qi::rule<common::iter,RemoveString()> remove_string;
+    qi::rule<common::iter,GetUserInput()> get_user_input;
+    qi::rule<common::iter,LoadModule()> load_module;
+    qi::rule<common::iter,GotoLabel()> goto_label;
+    qi::rule<common::iter,LogMessage()> log_message;
+    qi::rule<common::iter,TryCatch()> try_catch;
+    qi::rule<common::iter,ShowVariable()> show_variable;
+    qi::rule<common::iter,ResetPRM()> reset_prm;
+    qi::rule<common::iter,ImportVariables()> import_variables;
 
-    qi::rule<std::string::iterator,std::string()> identifier;
-    qi::rule<std::string::iterator,std::string()> quoted_string;
-    qi::rule<std::string::iterator,void()> end_statement, newline, end_quote;
-    qi::rule<std::string::iterator,std::vector<std::string>()> word_list;
-    qi::rule<std::string::iterator,Expression()> expression;
-    qi::rule<std::string::iterator,AddSubtract()> add_subtract;
-    qi::rule<std::string::iterator,MultiplyDivide()> multiply_divide;
-    qi::rule<std::string::iterator,FunctionCall()> function_call;
-    qi::rule<std::string::iterator,Statement()> statement;
+    qi::rule<common::iter,Expression()> expression;
+    qi::rule<common::iter,AddSubtract()> add_subtract;
+    qi::rule<common::iter,MultiplyDivide()> multiply_divide;
+    qi::rule<common::iter,FunctionCall()> function_call;
+    qi::rule<common::iter,Statement()> statement;
 };
 
 int main()
@@ -509,7 +500,7 @@ int main()
     stream.unsetf(std::ios::skipws);
     std::string text(std::istream_iterator<char>(stream),
                      (std::istream_iterator<char>()));
-    std::string::iterator begin = text.begin(), end = text.end();
+    common::iter begin = text.begin(), end = text.end();
     std::vector<Statement> s;
     EASIRules easi;
     try
