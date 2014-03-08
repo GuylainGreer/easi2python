@@ -133,7 +133,7 @@ struct ExpressionStreamer
 
 std::ostream & operator<<(std::ostream & s, Expression e)
 {
-    
+    return s;
 }
 
 struct FunctionCall
@@ -349,9 +349,8 @@ void init2(std::string name, Rule & rule)
 
 #define INIT(n) init2(#n, n);
 
-template <class Iterator>
 struct EASIRules :
-    qi::grammar<Iterator,
+    qi::grammar<std::string::iterator,
                 std::vector<Statement>()>
 {
     EASIRules() : EASIRules::base_type(start)
@@ -432,7 +431,7 @@ struct EASIRules :
                       function_call
                      /* | ('(' >> *qi::blank >> +add_subtract >> *qi::blank >> ')')*/)
             [at_c<0>(_val) = _1];
-        multiply_divide;
+        //multiply_divide;
         function_call = identifier[at_c<0>(_val) = _1] >> *qi::blank >> '(' >> 
             (*qi::space >> expression[push_back(at_c<1>(_val), _1)] >> 
              *qi::space) % ',' >> ')';
@@ -474,44 +473,45 @@ struct EASIRules :
         INIT(word_list);
     }
 
-    qi::rule<Iterator,std::vector<Statement>()> start;
-    qi::rule<Iterator,Documentation()> documentation;
-    qi::rule<Iterator,Comment()> comment;
-    qi::rule<Iterator,SetStatusTitle()> set_status_title;
-    qi::rule<Iterator,SetStatusS()> set_status_s;
-    qi::rule<Iterator,VariableDeclaration()> variable_declaration;
-    qi::rule<Iterator,RunModule()> run_module;
-    qi::rule<Iterator,StatModule()> stat_module;
-    qi::rule<Iterator,FunctionDefinition()> function_definition;
-    qi::rule<Iterator,RemoveString()> remove_string;
-    qi::rule<Iterator,GetUserInput()> get_user_input;
-    qi::rule<Iterator,LoadModule()> load_module;
-    qi::rule<Iterator,GotoLabel()> goto_label;
-    qi::rule<Iterator,LogMessage()> log_message;
-    qi::rule<Iterator,TryCatch()> try_catch;
-    qi::rule<Iterator,ShowVariable()> show_variable;
-    qi::rule<Iterator,ResetPRM()> reset_prm;
-    qi::rule<Iterator,ImportVariables()> import_variables;
+    qi::rule<std::string::iterator,std::vector<Statement>()> start;
+    qi::rule<std::string::iterator,Documentation()> documentation;
+    qi::rule<std::string::iterator,Comment()> comment;
+    qi::rule<std::string::iterator,SetStatusTitle()> set_status_title;
+    qi::rule<std::string::iterator,SetStatusS()> set_status_s;
+    qi::rule<std::string::iterator,VariableDeclaration()> variable_declaration;
+    qi::rule<std::string::iterator,RunModule()> run_module;
+    qi::rule<std::string::iterator,StatModule()> stat_module;
+    qi::rule<std::string::iterator,FunctionDefinition()> function_definition;
+    qi::rule<std::string::iterator,RemoveString()> remove_string;
+    qi::rule<std::string::iterator,GetUserInput()> get_user_input;
+    qi::rule<std::string::iterator,LoadModule()> load_module;
+    qi::rule<std::string::iterator,GotoLabel()> goto_label;
+    qi::rule<std::string::iterator,LogMessage()> log_message;
+    qi::rule<std::string::iterator,TryCatch()> try_catch;
+    qi::rule<std::string::iterator,ShowVariable()> show_variable;
+    qi::rule<std::string::iterator,ResetPRM()> reset_prm;
+    qi::rule<std::string::iterator,ImportVariables()> import_variables;
 
-    qi::rule<Iterator,std::string()> identifier;
-    qi::rule<Iterator,std::string()> quoted_string;
-    qi::rule<Iterator,void()> end_statement, newline, end_quote;
-    qi::rule<Iterator,std::vector<std::string>()> word_list;
-    qi::rule<Iterator,Expression()> expression;
-    qi::rule<Iterator,AddSubtract()> add_subtract;
-    qi::rule<Iterator,MultiplyDivide()> multiply_divide;
-    qi::rule<Iterator,FunctionCall()> function_call;
-    qi::rule<Iterator,Statement()> statement;
+    qi::rule<std::string::iterator,std::string()> identifier;
+    qi::rule<std::string::iterator,std::string()> quoted_string;
+    qi::rule<std::string::iterator,void()> end_statement, newline, end_quote;
+    qi::rule<std::string::iterator,std::vector<std::string>()> word_list;
+    qi::rule<std::string::iterator,Expression()> expression;
+    qi::rule<std::string::iterator,AddSubtract()> add_subtract;
+    qi::rule<std::string::iterator,MultiplyDivide()> multiply_divide;
+    qi::rule<std::string::iterator,FunctionCall()> function_call;
+    qi::rule<std::string::iterator,Statement()> statement;
 };
 
 int main()
 {
     std::ifstream stream("EASI_testfile.txt");
     stream.unsetf(std::ios::skipws);
-    auto begin = istream_iterator(stream);
-    auto end = istream_iterator();
+    std::string text(std::istream_iterator<char>(stream),
+                     (std::istream_iterator<char>()));
+    std::string::iterator begin = text.begin(), end = text.end();
     std::vector<Statement> s;
-    EASIRules<istream_iterator> easi;
+    EASIRules easi;
     try
     {
         parse(begin, end, easi, s);
