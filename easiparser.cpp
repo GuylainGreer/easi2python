@@ -1,3 +1,5 @@
+#include "documentation.hh"
+#include "comment.hh"
 #include "common.hh"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -37,27 +39,6 @@ namespace std {
 
 using namespace boost::spirit;
 using namespace boost::phoenix;
-
-struct Comment
-{
-    std::string comment;
-    static qi::rule<common::iter, Comment()> get_rule()
-    {
-        return "!" >> *(qi::char_ - common::newline);
-    }
-};
-
-BOOST_FUSION_ADAPT_STRUCT(Comment, (std::string, comment));
-
-struct Documentation
-{
-    std::string documentation;
-    int end_doc_line_number;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(Documentation,
-                          (std::string, documentation)
-                          (int, end_doc_line_number));
 
 struct SetStatusTitle
 {
@@ -361,12 +342,7 @@ struct EASIRules :
     EASIRules() : EASIRules::base_type(start)
     {
         comment = Comment::get_rule();
-        documentation =
-            ascii::no_case[lit("doc")] >> 
-            +qi::blank >> 
-            (*(qi::char_ - common::newline)[at_c<0>(_val) += _1]) >> 
-            -(common::newline >> *qi::blank >> -int_[at_c<1>(_val) = _1] >> 
-              +qi::blank >> ascii::no_case[lit("doc_end")]);
+        documentation = Documentation::get_rule();
         set_status_title =
             ascii::no_case[lit("status_title")] >> +qi::blank >>
             common::quoted_string[at_c<0>(_val) = _1];
