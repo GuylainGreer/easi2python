@@ -1,3 +1,4 @@
+#include "set_status_title.hh"
 #include "documentation.hh"
 #include "comment.hh"
 #include "common.hh"
@@ -39,13 +40,6 @@ namespace std {
 
 using namespace boost::spirit;
 using namespace boost::phoenix;
-
-struct SetStatusTitle
-{
-    std::string title;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(SetStatusTitle, (std::string, title))
 
 struct SetStatusS
 {
@@ -343,9 +337,7 @@ struct EASIRules :
     {
         comment = Comment::get_rule();
         documentation = Documentation::get_rule();
-        set_status_title =
-            ascii::no_case[lit("status_title")] >> +qi::blank >>
-            common::quoted_string[at_c<0>(_val) = _1];
+        set_status_title = SetStatusTitle::get_rule();
         set_status_s =
             ascii::no_case[lit("status_s")] >> +qi::blank >>
             common::quoted_string[at_c<0>(_val) = _1];
