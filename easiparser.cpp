@@ -1,3 +1,4 @@
+#include "run_module.hh"
 #include "variable_declaration.hh"
 #include "set_status_string.hh"
 #include "set_status_title.hh"
@@ -108,14 +109,6 @@ struct FunctionCall
 BOOST_FUSION_ADAPT_STRUCT(FunctionCall,
                           (std::string,name)
                           (std::vector<Expression>,arguments));
-
-struct RunModule
-{
-    std::string module_name;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(RunModule,
-                          (std::string,module_name));
 
 struct StatModule
 {
@@ -323,9 +316,7 @@ struct EASIRules :
         set_status_title = SetStatusTitle::get_rule();
         set_status_s = SetStatusString::get_rule();
         variable_declaration = VariableDeclaration::get_rule();
-        run_module =
-            (qi::no_case['r'] >> -qi::no_case[lit("un")]) >>
-            +qi::blank >> (common::identifier | common::quoted_string)[at_c<0>(_val) = _1];
+        run_module = RunModule::get_rule();
         stat_module =
             (qi::no_case['s'] >> -qi::no_case[lit("tatus")]) >>
             +qi::blank >> 
