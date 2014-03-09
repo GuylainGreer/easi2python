@@ -3,7 +3,7 @@ import os
 cflags = '-Wall -fvisibility=hidden -DBOOST_RESULT_OF_USE_DECLTYPE -ftemplate-depth-10000'
 ccflags = '-std=c++11 '
 if int(ARGUMENTS.get('debug', 1)):
-    cflags += ' -g3 -ggdb -DDEBUG '
+    cflags += ' -g3 -ggdb -DDEBUG -DENABLE_SPIRIT_DEBUGGING '
     linkflags = ''
 else:
     cflags += ' -O2 -DNDEBUG -flto '
