@@ -102,14 +102,18 @@ template <class ... Rules>
 void init(Rules&...rules)
 {
     dummy((rules.name(filter_name(get_cpp_name<get_attr<Rules> >())), 0)...);
+#ifdef ENABLE_SPIRIT_DEBUGGING
     dummy((qi::debug((rules)), 0)...);
+#endif
 }
 
 template <class Rule>
 void init2(std::string name, Rule & rule)
 {
     rule.name(name);
+#ifdef ENABLE_SPIRIT_DEBUGGING
     qi::debug(rule);
+#endif
 }
 
 #define INIT(n) init2(#n, n);

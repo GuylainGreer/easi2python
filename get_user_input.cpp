@@ -13,5 +13,8 @@ qi::rule<common::iter, GetUserInput()> GetUserInput::get_rule()
         common::quoted_string[at_c<0>(_val) = _1] >> *qi::blank >>
         common::identifier[at_c<1>(_val) += _1];
     r.name("GetUserInput");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

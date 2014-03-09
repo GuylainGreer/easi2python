@@ -14,5 +14,8 @@ qi::rule<common::iter,ShowVariable()> ShowVariable::get_rule()
           ',' >> *qi::blank >>
           int_[at_c<2>(_val) = _1]);
     r.name("ShowVariable");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

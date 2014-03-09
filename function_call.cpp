@@ -15,5 +15,8 @@ FunctionCall::get_rule(qi::rule<common::iter,Expression()> & expression)
         (*qi::space >> expression[push_back(at_c<1>(_val), _1)] >> 
          *qi::space) % ',' >> ')';
     r.name("FunctionCall");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

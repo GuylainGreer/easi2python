@@ -13,5 +13,8 @@ qi::rule<common::iter, ImportVariables()> ImportVariables::get_rule()
          common::identifier[push_back(at_c<0>(_val), _1)] >>
          *qi::blank) % ',';
     r.name("ImportVariables");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

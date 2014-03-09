@@ -20,5 +20,8 @@ TryCatch::get_rule(qi::rule<common::iter,Statement()> & s)
           common::end_statement) >>
         *qi::blank >> qi::no_case[qi::lit("endonerror")];
     r.name("TryCatch");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

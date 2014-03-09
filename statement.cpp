@@ -36,5 +36,10 @@ qi::rule<common::iter, Statement()> Statement::get_rule()
     statement.name("Statement");
     function_definition = FunctionDefinition::get_rule(statement);
     try_catch = TryCatch::get_rule(statement);
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(statement);
+    debug(function_definition);
+    debug(try_catch);
+#endif
     return statement;
 }

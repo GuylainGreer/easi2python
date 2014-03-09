@@ -10,5 +10,8 @@ qi::rule<common::iter, GotoLabel()> GotoLabel::get_rule()
     static qi::rule<common::iter, GotoLabel()> r = 
         *(qi::char_ - (qi::blank | ':'))[at_c<0>(_val) += _1] >> ':';
     r.name("GotoLabel");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

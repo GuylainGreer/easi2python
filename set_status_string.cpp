@@ -11,5 +11,8 @@ qi::rule<common::iter, SetStatusString()> SetStatusString::get_rule()
         ascii::no_case[lit("status_s")] >> +qi::blank >>
         common::quoted_string[at_c<0>(_val) = _1];
     r.name("SetStatusString");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

@@ -12,5 +12,8 @@ qi::rule<common::iter, StatModule()> StatModule::get_rule()
         +qi::blank >> 
         +(qi::char_ - common::end_statement)[at_c<0>(_val) += _1];
     r.name("StatModule");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

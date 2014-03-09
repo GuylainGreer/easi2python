@@ -20,5 +20,8 @@ FunctionDefinition::get_rule(qi::rule<common::iter,Statement()> & s)
            common::end_statement) >>
          qi::no_case[qi::lit("enddefine")]);
     r.name("FunctionDefinition");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

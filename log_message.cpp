@@ -11,5 +11,8 @@ qi::rule<common::iter, LogMessage()> LogMessage::get_rule()
         qi::no_case[qi::lit("log")] >> +qi::blank >>
         +(qi::char_ - common::newline)[at_c<0>(_val) += _1];
     r.name("LogMessage");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

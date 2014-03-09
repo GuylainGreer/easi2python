@@ -25,5 +25,10 @@ Expression::get_rule()
     add_subtract = AddSubtract::get_rule(r);
     function_call = FunctionCall::get_rule(r);
     r.name("Expression");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+    debug(add_subtract);
+    debug(function_call);
+#endif
     return r;
 }

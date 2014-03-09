@@ -19,5 +19,9 @@ AddSubtract::get_rule(qi::rule<common::iter,Expression()> & expression)
         (qi::char_('+')[push_back(at_c<1>(_val), _1)] |
          qi::char_('/')[push_back(at_c<1>(_val), _1)]);
     r.name("AddSubtract");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(multiply_divide);
+    debug(r);
+#endif
     return r;
 }

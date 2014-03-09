@@ -11,5 +11,8 @@ qi::rule<common::iter, RunModule()> RunModule::get_rule()
         (qi::no_case['r'] >> -qi::no_case[lit("un")]) >>
         +qi::blank >> (common::identifier | common::quoted_string)[at_c<0>(_val) = _1];
     r.name("RunModule");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

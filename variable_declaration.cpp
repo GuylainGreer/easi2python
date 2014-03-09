@@ -14,5 +14,8 @@ qi::rule<common::iter, VariableDeclaration()> VariableDeclaration::get_rule()
           lit("int")[at_c<1>(_val) = "int"] ) >> +qi::blank) >>
         common::word_list[at_c<2>(_val) = _1];
     r.name("VariableDeclaration");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }

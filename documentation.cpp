@@ -15,5 +15,8 @@ qi::rule<common::iter, Documentation()> Documentation::get_rule()
         -(common::newline >> *qi::blank >> -int_[at_c<1>(_val) = _1] >> 
           +qi::blank >> ascii::no_case[lit("doc_end")]);
     r.name("Documentation");
+#ifdef ENABLE_SPIRIT_DEBUGGING
+    debug(r);
+#endif
     return r;
 }
