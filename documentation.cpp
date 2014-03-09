@@ -8,9 +8,12 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, Documentation()> Documentation::get_rule()
 {
-    return ascii::no_case[lit("doc")] >> 
+    static qi::rule<common::iter, Documentation()> r =
+        ascii::no_case[lit("doc")] >> 
         +qi::blank >> 
         (*(qi::char_ - common::newline)[at_c<0>(_val) += _1]) >> 
         -(common::newline >> *qi::blank >> -int_[at_c<1>(_val) = _1] >> 
           +qi::blank >> ascii::no_case[lit("doc_end")]);
+    r.name("Documentation");
+    return r;
 }

@@ -7,8 +7,11 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, GetUserInput()> GetUserInput::get_rule()
 {
-    return qi::no_case[qi::lit("input") |
-                       qi::lit("ask")] >> +qi::blank >> 
+    static qi::rule<common::iter, GetUserInput()> r =
+        qi::no_case[qi::lit("input") |
+                    qi::lit("ask")] >> +qi::blank >> 
         common::quoted_string[at_c<0>(_val) = _1] >> *qi::blank >>
         common::identifier[at_c<1>(_val) += _1];
+    r.name("GetUserInput");
+    return r;
 }

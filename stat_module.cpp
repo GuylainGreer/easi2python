@@ -7,7 +7,10 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, StatModule()> StatModule::get_rule()
 {
-    return (qi::no_case['s'] >> -qi::no_case[lit("tatus")]) >>
+    static qi::rule<common::iter, StatModule()> r =
+        (qi::no_case['s'] >> -qi::no_case[lit("tatus")]) >>
         +qi::blank >> 
         +(qi::char_ - common::end_statement)[at_c<0>(_val) += _1];
+    r.name("StatModule");
+    return r;
 }

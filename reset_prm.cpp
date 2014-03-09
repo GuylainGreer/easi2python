@@ -7,5 +7,8 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, ResetPRM()> ResetPRM::get_rule()
 {
-    return qi::no_case[qi::lit("reset")][_val = ResetPRM()];
+    static qi::rule<common::iter, ResetPRM()> r = 
+        qi::no_case[qi::lit("reset")][_val = ResetPRM()];
+    r.name("ResetPRM");
+    return r;
 }

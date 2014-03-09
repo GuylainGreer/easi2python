@@ -6,5 +6,8 @@ using namespace boost::spirit;
 
 qi::rule<common::iter, Comment()> Comment::get_rule()
 {
-    return "!" >> *(qi::char_ - common::newline);
+    static qi::rule<common::iter, Comment()> r =
+        "!" >> *(qi::char_ - common::newline);
+    r.name("Comment");
+    return r;
 }

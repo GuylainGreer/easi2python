@@ -7,6 +7,9 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, LoadModule()> LoadModule::get_rule()
 {
-    return qi::no_case[qi::lit("load")] >> +qi::blank >>
+    static qi::rule<common::iter, LoadModule()> r = 
+        qi::no_case[qi::lit("load")] >> +qi::blank >>
         common::quoted_string[at_c<0>(_val) = _1];
+    r.name("LoadModule");
+    return r;
 }

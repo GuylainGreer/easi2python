@@ -7,5 +7,8 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, GotoLabel()> GotoLabel::get_rule()
 {
-    return *(qi::char_ - (qi::blank | ':'))[at_c<0>(_val) += _1] >> ':';
+    static qi::rule<common::iter, GotoLabel()> r = 
+        *(qi::char_ - (qi::blank | ':'))[at_c<0>(_val) += _1] >> ':';
+    r.name("GotoLabel");
+    return r;
 }

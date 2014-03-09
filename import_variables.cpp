@@ -7,8 +7,11 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, ImportVariables()> ImportVariables::get_rule()
 {
-    return qi::no_case[qi::lit("import")] >> +qi::blank >>
+    qi::rule<common::iter, ImportVariables()> r = 
+        qi::no_case[qi::lit("import")] >> +qi::blank >>
         (*qi::blank >>
          common::identifier[push_back(at_c<0>(_val), _1)] >>
          *qi::blank) % ',';
+    r.name("ImportVariables");
+    return r;
 }

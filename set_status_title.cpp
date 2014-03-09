@@ -8,6 +8,9 @@ using namespace boost::phoenix;
 
 qi::rule<common::iter, SetStatusTitle()> SetStatusTitle::get_rule()
 {
-    return ascii::no_case[lit("status_title")] >> +qi::blank >>
+    static qi::rule<common::iter, SetStatusTitle()> r =
+        ascii::no_case[lit("status_title")] >> +qi::blank >>
         common::quoted_string[at_c<0>(_val) = _1];
+    r.name("SetStatusTitle");
+    return r;
 }
