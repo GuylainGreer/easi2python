@@ -1,38 +1,18 @@
-#include "import_variables.hh"
-#include "reset_prm.hh"
-#include "log_message.hh"
-#include "goto_label.hh"
-#include "load_module.hh"
-#include "get_user_input.hh"
-#include "show_variable.hh"
-#include "remove_string.hh"
-#include "stat_module.hh"
-#include "run_module.hh"
-#include "variable_declaration.hh"
-#include "set_status_string.hh"
-#include "set_status_title.hh"
-#include "documentation.hh"
-#include "comment.hh"
+#include "statement.hh"
+#include "function_definition.hh"
+#include "try_catch.hh"
+#include "expression.hh"
+#include "multiply_divide.hh"
+#include "add_subtract.hh"
+#include "function_call.hh"
 #include "common.hh"
+
 #include <boost/spirit/include/qi.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/fusion/include/size.hpp>
-#include <boost/lambda/lambda.hpp>
 #include <boost/spirit/include/support_utree.hpp>
-#include <boost/fusion/sequence/intrinsic/at_c.hpp>
-#include <boost/spirit/include/support_istream_iterator.hpp>
-#include <boost/spirit/include/qi_no_case.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
-#include <boost/variant/recursive_variant.hpp>
-#include <boost/variant.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #include "typename.hh"
 #include <vector>
 #include <iterator>
 #include <fstream>
-#include <cctype>
-#include <boost/mpl/at.hpp>
 
 namespace std {
     template <class T>
@@ -53,48 +33,6 @@ namespace std {
 using namespace boost::spirit;
 using namespace boost::phoenix;
 
-struct FunctionCall;
-struct AddSubtract;
-struct MultiplyDivide;
-
-struct Expression
-{
-    typedef boost::variant<
-        double,
-        std::string,
-        boost::recursive_wrapper<FunctionCall>,
-        std::vector<boost::recursive_wrapper<AddSubtract> >
-        > type;
-    bool quoted_string = false;
-    type expression;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(Expression,
-                          (Expression::type, expression)
-                          (bool, quoted_string));
-
-struct MultiplyDivide
-{
-    Expression left, right;
-    bool multiply;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(MultiplyDivide,
-                          (Expression, left)
-                          (Expression, right)
-                          (bool, multiply));
-
-struct AddSubtract
-{
-    MultiplyDivide left, right;
-    bool add;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(AddSubtract,
-                          (MultiplyDivide, left)
-                          (MultiplyDivide, right)
-                          (bool, add));
-
 struct ExpressionStreamer
 {
     std::reference_wrapper<std::ostream> stream;
@@ -108,69 +46,6 @@ std::ostream & operator<<(std::ostream & s, Expression e)
 {
     return s;
 }
-
-struct FunctionCall
-{
-    std::string name;
-    std::vector<Expression> arguments;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(FunctionCall,
-                          (std::string,name)
-                          (std::vector<Expression>,arguments));
-
-struct FunctionDefinition;
-struct TryCatch;
-
-struct Statement
-{
-    int line_number = -1;
-    typedef boost::variant<
-        Comment,
-        Documentation,
-        SetStatusTitle,
-        SetStatusString,
-        VariableDeclaration,
-        RunModule,
-        StatModule,
-        ShowVariable,
-        boost::recursive_wrapper<FunctionDefinition>,
-        RemoveString,
-        GetUserInput,
-        LoadModule,
-        GotoLabel,
-        LogMessage,
-        boost::recursive_wrapper<TryCatch>,
-        ResetPRM,
-        ImportVariables
-        > statement_subtype;
-    statement_subtype info;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(Statement,
-                          (int,line_number)
-                          (Statement::statement_subtype, info));
-
-struct FunctionDefinition
-{
-    std::string name, parameters;
-    std::vector<Statement> statements;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(FunctionDefinition,
-                          (std::string, name)
-                          (std::string, parameters)
-                          (std::vector<Statement>, statements));
-
-struct TryCatch
-{
-    std::vector<Statement> try_block;
-    std::vector<Statement> catch_block;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(TryCatch,
-                          (std::vector<Statement>, try_block)
-                          (std::vector<Statement>, catch_block));
 
 struct streamer : public boost::static_visitor<>
 {
@@ -245,74 +120,10 @@ struct EASIRules :
 {
     EASIRules() : EASIRules::base_type(start)
     {
-        comment = Comment::get_rule();
-        documentation = Documentation::get_rule();
-        set_status_title = SetStatusTitle::get_rule();
-        set_status_s = SetStatusString::get_rule();
-        variable_declaration = VariableDeclaration::get_rule();
-        run_module = RunModule::get_rule();
-        stat_module = StatModule::get_rule();
-        function_definition =
-            (qi::no_case[qi::lit("define")] >> +qi::blank >>
-             qi::no_case[qi::lit("function")] >> +qi::blank >>
-             +(qi::char_ - '(')[at_c<0>(_val) += _1] >>
-             '(' >> *(qi::char_ - ')')[at_c<1>(_val) += _1] >> ')' >>
-             *(qi::blank | common::newline) >>
-             *(statement[push_back(at_c<2>(_val), _1)] >> 
-               common::end_statement) >>
-             qi::no_case[qi::lit("enddefine")]);
-        remove_string = RemoveString::get_rule();
-        show_variable = ShowVariable::get_rule();
-        get_user_input = GetUserInput::get_rule();
-        load_module = LoadModule::get_rule();
-        goto_label = GotoLabel::get_rule();
-        log_message = LogMessage::get_rule();
-        try_catch = qi::no_case[qi::lit("try")] >> *qi::blank >> -common::newline >> 
-            *(statement[push_back(at_c<0>(_val), _1)] >> common::end_statement) >>
-            qi::no_case[qi::lit("onerror")] >>
-            *qi::blank >> -common::newline >> 
-            *(statement[push_back(at_c<1>(_val), _1)] >> common::end_statement) >>
-            *qi::blank >> qi::no_case[qi::lit("endonerror")];
-        reset_prm = ResetPRM::get_rule();
-        import_variables = ImportVariables::get_rule();
-        expression = (common::identifier | double_ | common::quoted_string[at_c<1>(_val) = true] | 
-                      function_call
-                     /* | ('(' >> *qi::blank >> +add_subtract >> *qi::blank >> ')')*/)
-            [at_c<0>(_val) = _1];
-        //multiply_divide;
-        function_call = common::identifier[at_c<0>(_val) = _1] >> *qi::blank >> '(' >> 
-            (*qi::space >> expression[push_back(at_c<1>(_val), _1)] >> 
-             *qi::space) % ',' >> ')';
-
-        statement = *qi::blank >> -(qi::int_[at_c<0>(_val) = _1] >> 
-                                    +qi::blank) >>
-            (comment | documentation | set_status_title | set_status_s |
-             variable_declaration | run_module | stat_module |
-             function_definition | remove_string | show_variable |
-             get_user_input | load_module | goto_label | log_message |
-             try_catch | reset_prm | import_variables)
-            [at_c<1>(_val) = _1];
+        statement = Statement::get_rule().copy();
         start = *(statement >> +common::end_statement);
 
-        init(start,
-             documentation,
-             comment,
-             set_status_title,
-             set_status_s,
-             variable_declaration,
-             run_module,
-             stat_module,
-             function_definition,
-             remove_string,
-             get_user_input,
-             load_module,
-             goto_label,
-             log_message,
-             try_catch,
-             show_variable,
-             reset_prm,
-             import_variables,
-             statement);
+        init(statement);
         INIT(common::identifier);
         INIT(common::quoted_string);
         INIT(common::end_statement);
@@ -322,28 +133,6 @@ struct EASIRules :
     }
 
     qi::rule<common::iter,std::vector<Statement>()> start;
-    qi::rule<common::iter,Documentation()> documentation;
-    qi::rule<common::iter,Comment()> comment;
-    qi::rule<common::iter,SetStatusTitle()> set_status_title;
-    qi::rule<common::iter,SetStatusString()> set_status_s;
-    qi::rule<common::iter,VariableDeclaration()> variable_declaration;
-    qi::rule<common::iter,RunModule()> run_module;
-    qi::rule<common::iter,StatModule()> stat_module;
-    qi::rule<common::iter,FunctionDefinition()> function_definition;
-    qi::rule<common::iter,RemoveString()> remove_string;
-    qi::rule<common::iter,GetUserInput()> get_user_input;
-    qi::rule<common::iter,LoadModule()> load_module;
-    qi::rule<common::iter,GotoLabel()> goto_label;
-    qi::rule<common::iter,LogMessage()> log_message;
-    qi::rule<common::iter,TryCatch()> try_catch;
-    qi::rule<common::iter,ShowVariable()> show_variable;
-    qi::rule<common::iter,ResetPRM()> reset_prm;
-    qi::rule<common::iter,ImportVariables()> import_variables;
-
-    qi::rule<common::iter,Expression()> expression;
-    qi::rule<common::iter,AddSubtract()> add_subtract;
-    qi::rule<common::iter,MultiplyDivide()> multiply_divide;
-    qi::rule<common::iter,FunctionCall()> function_call;
     qi::rule<common::iter,Statement()> statement;
 };
 
