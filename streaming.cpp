@@ -2,6 +2,7 @@
 #include "statement.hh"
 #include "expression.hh"
 #include "typename.hh"
+#include <boost/fusion/include/value_at.hpp>
 #include <functional>
 
 struct ExpressionStreamer
@@ -38,7 +39,13 @@ struct streamer : public boost::static_visitor<>
     {
         if(N)
             Print<N?N-1:N>(t);
-        stream.get() << boost::fusion::at_c<N>(t) << inter;
+        if(std::is_same<
+               typename boost::fusion::result_of::value_at_c<T, N>::type,
+               std::string
+               >::value)
+            stream.get() << "\"" << boost::fusion::at_c<N>(t) << "\"" << inter;
+        else
+            stream.get() << boost::fusion::at_c<N>(t) << inter;
     }
 };
 
