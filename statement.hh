@@ -49,4 +49,8 @@ struct Statement
     static boost::spirit::qi::rule<common::iter, Statement()> get_rule();
 };
 
+//And now include the recursive ones
+#include "function_definition.hh"
+#include "try_catch.hh"
+
 #endif
