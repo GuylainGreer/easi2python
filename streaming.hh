@@ -19,9 +19,9 @@ namespace std {
     template <class T>
     ostream & operator<<(ostream & s, const vector<T> & v)
     {
-        s << "vector(";
+        s << "vector( " << v.size() << ": ";
         s << 
-            std::accumulate(v.begin() + 1, v.end(), std::string(),
+            std::accumulate(v.begin(), v.end(), std::string(),
                             [](const std::string & st, const T & t)
                             {
                                 std::stringstream s;
