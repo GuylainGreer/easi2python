@@ -12,7 +12,7 @@ qi::rule<common::iter, VariableDeclaration()> VariableDeclaration::get_rule()
          +qi::blank) ||
         ((lit("string")[at_c<1>(_val) = "string"] |
           lit("int")[at_c<1>(_val) = "int"] ) >> +qi::blank) >>
-        common::word_list[at_c<2>(_val) = _1];
+        common::id_list[at_c<2>(_val) = _1];
     r.name("VariableDeclaration");
 #ifdef ENABLE_SPIRIT_DEBUGGING
     debug(r);

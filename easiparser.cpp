@@ -1,6 +1,4 @@
 #include "statement.hh"
-#include "function_definition.hh"
-#include "try_catch.hh"
 #include "expression.hh"
 #include "multiply_divide.hh"
 #include "add_subtract.hh"
@@ -9,7 +7,6 @@
 #include "streaming.hh"
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_utree.hpp>
 #include "typename.hh"
 #include <vector>
 #include <iterator>
@@ -71,7 +68,7 @@ struct EASIRules :
         INIT(common::end_statement);
         INIT(common::newline);
         INIT(common::end_quote);
-        INIT(common::word_list);
+        INIT(common::id_list);
     }
 
     qi::rule<common::iter,std::vector<Statement>()> start;
