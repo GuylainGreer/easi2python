@@ -13,6 +13,7 @@ qi::rule<common::iter, Statement()> Statement::get_rule()
     //Recursive rules must be stored as well, else SEGFAULT!
     static qi::rule<common::iter,FunctionDefinition()> function_definition;
     static qi::rule<common::iter,TryCatch()> try_catch;
+    static qi::rule<common::iter,Expression()> expression;
     static qi::rule<common::iter,Statement()> statement =
         *qi::blank >> -(qi::int_[at_c<0>(_val) = _1] >> 
                         +qi::blank) >>
@@ -32,10 +33,12 @@ qi::rule<common::iter, Statement()> Statement::get_rule()
          LogMessage::get_rule().copy() |
          try_catch |
          ResetPRM::get_rule().copy() |
-         ImportVariables::get_rule().copy())[at_c<1>(_val) = _1];
+         ImportVariables::get_rule().copy() |
+         FunctionCall::get_rule(expression).copy())[at_c<1>(_val) = _1];
     statement.name("Statement");
     function_definition = FunctionDefinition::get_rule(statement);
     try_catch = TryCatch::get_rule(statement);
+    expression = Expression::get_rule();
 #ifdef ENABLE_SPIRIT_DEBUGGING
     debug(statement);
     debug(function_definition);

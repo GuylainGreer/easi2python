@@ -19,6 +19,7 @@
 #include "set_status_title.hh"
 #include "documentation.hh"
 #include "comment.hh"
+#include "function_call.hh"
 
 struct FunctionDefinition;
 struct TryCatch;
@@ -43,7 +44,8 @@ struct Statement
         LogMessage,
         boost::recursive_wrapper<TryCatch>,
         ResetPRM,
-        ImportVariables
+        ImportVariables,
+        FunctionCall
         > statement_subtype;
     statement_subtype info;
     static boost::spirit::qi::rule<common::iter, Statement()> get_rule();
