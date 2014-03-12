@@ -26,4 +26,7 @@ BOOST_FUSION_ADAPT_STRUCT(Expression,
                           (Expression::type, expression)
                           (bool, quoted_string));
 
+#include "add_subtract.hh"
+#include "multiply_divide.hh"
+
 #endif
