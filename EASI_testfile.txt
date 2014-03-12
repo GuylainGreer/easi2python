@@ -1,11 +1,11 @@
-1 ! This is a comment
+1 !   This is a comment   
 24 DOC This is documentation
 32 DOC_end
 40 doc This is another documentation line
 41 !This is another comment
 84 status_TITLE "Hello world"  
 Status_S "Hullo wurld"
-local int n1, n2, n$3
+local int n1, n2, n$3, #max#
  !This is a new comment
 run module_name \ r "quoted_module_name" 
 status module1
@@ -29,4 +29,4 @@ ask "What's the answer?" answer
 endonerror
 reset
 import g1, g2, g3
-
+call_function(x, y, 10)
