@@ -5,8 +5,9 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
 #include "expression.hh"
+#include "streaming.hh"
 
-struct MultiplyDivide
+struct MultiplyDivide : TuplePrinter<MultiplyDivide>
 {
     std::vector<Expression> terms;
     std::vector<char> ops;

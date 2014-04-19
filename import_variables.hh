@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct ImportVariables
+struct ImportVariables : TuplePrinter<ImportVariables>
 {
     std::vector<std::string> names;
     static boost::spirit::qi::rule<common::iter, ImportVariables()> get_rule();

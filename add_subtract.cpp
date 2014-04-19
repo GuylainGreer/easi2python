@@ -5,6 +5,7 @@
 #include "expression.hh"
 #include "multiply_divide.hh"
 #include "function_call.hh"
+#include <ostream>
 
 using namespace boost::spirit;
 using namespace boost::phoenix;

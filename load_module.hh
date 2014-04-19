@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct LoadModule
+struct LoadModule : TuplePrinter<LoadModule>
 {
     std::string module_name;
     static boost::spirit::qi::rule<common::iter, LoadModule()> get_rule();

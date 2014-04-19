@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct RemoveString
+struct RemoveString : TuplePrinter<RemoveString>
 {
     std::string value;
     static boost::spirit::qi::rule<common::iter,RemoveString()> get_rule();

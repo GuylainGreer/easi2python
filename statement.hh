@@ -20,11 +20,12 @@
 #include "documentation.hh"
 #include "comment.hh"
 #include "function_call.hh"
+#include "streaming.hh"
 
 struct FunctionDefinition;
 struct TryCatch;
 
-struct Statement
+struct Statement : TupleWithVariantPrinter<Statement, 1>
 {
     int line_number = -1;
     typedef boost::variant<
@@ -50,6 +51,10 @@ struct Statement
     statement_subtype info;
     static boost::spirit::qi::rule<common::iter, Statement()> get_rule();
 };
+
+BOOST_FUSION_ADAPT_STRUCT(Statement,
+                          (int, line_number)
+                          (Statement::statement_subtype, info));
 
 //And now include the recursive ones
 #include "function_definition.hh"

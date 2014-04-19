@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct ShowVariable
+struct ShowVariable : TuplePrinter<ShowVariable>
 {
     std::string var_name;
     int min = -1, max = -1;

@@ -5,12 +5,9 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
 #include "statement.hh"
+#include "streaming.hh"
 
-BOOST_FUSION_ADAPT_STRUCT(Statement,
-                          (int,line_number)
-                          (Statement::statement_subtype, info));
-
-struct FunctionDefinition
+struct FunctionDefinition : TuplePrinter<FunctionDefinition>
 {
     std::string name, parameters;
     std::vector<Statement> statements;

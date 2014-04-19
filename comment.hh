@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct Comment
+struct Comment : TuplePrinter<Comment>
 {
     std::string comment;
     static boost::spirit::qi::rule<common::iter, Comment()> get_rule();

@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct Documentation
+struct Documentation : TuplePrinter<Documentation>
 {
     std::string documentation;
     int end_doc_line_number;

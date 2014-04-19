@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct VariableDeclaration
+struct VariableDeclaration : TuplePrinter<VariableDeclaration>
 {
     bool is_local = false;
     std::string type;

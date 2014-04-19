@@ -5,8 +5,9 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
 #include "statement.hh"
+#include "streaming.hh"
 
-struct TryCatch
+struct TryCatch : TuplePrinter<TryCatch>
 {
     std::vector<Statement> try_block;
     std::vector<Statement> catch_block;

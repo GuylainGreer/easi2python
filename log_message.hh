@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct LogMessage
+struct LogMessage : TuplePrinter<LogMessage>
 {
     std::string message;
     static boost::spirit::qi::rule<common::iter, LogMessage()> get_rule();

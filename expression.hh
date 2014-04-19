@@ -4,12 +4,13 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
 struct FunctionCall;
 struct AddSubtract;
 struct MultiplyDivide;
 
-struct Expression
+struct Expression : TupleWithVariantPrinter<Expression, 0>
 {
     typedef boost::variant<
         double,

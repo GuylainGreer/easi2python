@@ -5,8 +5,10 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
 #include "multiply_divide.hh"
+#include <ostream>
+#include "streaming.hh"
 
-struct AddSubtract
+struct AddSubtract : TuplePrinter<AddSubtract>
 {
     std::vector<MultiplyDivide> terms;
     std::vector<char> operations;

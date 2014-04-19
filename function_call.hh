@@ -5,8 +5,9 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
 #include "expression.hh"
+#include "streaming.hh"
 
-struct FunctionCall
+struct FunctionCall : TuplePrinter<FunctionCall>
 {
     std::string name;
     std::vector<Expression> arguments;

@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct GotoLabel
+struct GotoLabel : TuplePrinter<GotoLabel>
 {
     std::string name;
     static boost::spirit::qi::rule<common::iter, GotoLabel()> get_rule();

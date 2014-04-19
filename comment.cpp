@@ -2,6 +2,7 @@
 #include "common.hh"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include "streaming.hh"
 
 using namespace boost::spirit;
 using namespace boost::phoenix;

@@ -2,17 +2,21 @@ import os
 
 cflags = '-DBOOST_RESULT_OF_USE_DECLTYPE '
 ccflags = '-std=c++11 '
-if int(ARGUMENTS.get('debug', 1)):
+debug = int(ARGUMENTS.get('debug', 1))
+if debug:
     cflags += ' -g3 -ggdb -DDEBUG -DENABLE_SPIRIT_DEBUGGING '
     linkflags = ''
 else:
-    cflags += ' -O2 -DNDEBUG -flto '
-    linkflags = ' -flto '
+    cflags += ' -O3 -DNDEBUG '
+    linkflags = ''
 
-if ARGUMENTS.get('cl', 'clang') == 'gcc':
-    cc = 'gcc-4.8'
-    cpp = 'g++-4.8'
-    cflags += ' -fopenmp -Wall -fvisibility=hidden -ftemplate-depth-10000'
+if ARGUMENTS.get('cl', 'gcc') == 'gcc':
+    cc = 'gcc'
+    cpp = 'g++'
+    cflags += ' -fopenmp -Wall -fvisibility=hidden -ftemplate-depth-10000 '
+    if not debug:
+        cflags += ' -flto '
+        linkflags = ' -flto '
 else:
     cc = 'clang'
     cpp = 'clang++'

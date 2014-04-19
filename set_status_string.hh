@@ -4,8 +4,9 @@
 #include <boost/spirit/include/qi_rule.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include "common.hh"
+#include "streaming.hh"
 
-struct SetStatusString
+struct SetStatusString : TuplePrinter<SetStatusString>
 {
     std::string identifier;
 
